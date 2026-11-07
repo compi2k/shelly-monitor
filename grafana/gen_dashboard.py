@@ -141,9 +141,9 @@ stat("Power now per plug", [tgt(P)], w=8, unit="watt", decimals=1, graph_mode="a
      thresholds=[{"color": "green", "value": None}, {"color": "orange", "value": 1000},
                  {"color": "red", "value": 2500}])
 stat("Relay", [tgt(f"shelly_relay_on{{{F}}}")], w=4, mappings=ONOFF, color_mode="background")
-stat("Energy today", [tgt(f"sum(increase({E}[$__range]))/1000", "kWh")], w=4, unit="kwatth",
+stat("Energy today", [tgt(f"sum(increase({E}[$__range]))/1000", "kWh", instant=True)], w=4, unit="kwatth",
      decimals=3, time_from="now/d", thresholds=GREEN)
-stat("Cost today", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€")], w=4, unit="currencyEUR",
+stat("Cost today", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€", instant=True)], w=4, unit="currencyEUR",
      decimals=2, time_from="now/d", thresholds=GREEN)
 
 # =========================================================================== #
@@ -152,17 +152,17 @@ stat("kWh – selected range", [tgt(f"sum(increase({E}[$__range]))/1000", "kWh",
      w=4, unit="kwatth", decimals=3, thresholds=GREEN)
 stat("Cost – selected range", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€", instant=True)],
      w=4, unit="currencyEUR", decimals=2, thresholds=GREEN)
-stat("Cost this week", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€")], w=4,
+stat("Cost this week", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€", instant=True)], w=4,
      unit="currencyEUR", decimals=2, time_from="now/w", thresholds=GREEN)
-stat("Cost this month", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€")], w=4,
+stat("Cost this month", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€", instant=True)], w=4,
      unit="currencyEUR", decimals=2, time_from="now/M", thresholds=GREEN)
-stat("Cost this year", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€")], w=4,
+stat("Cost this year", [tgt(f"sum(increase({E}[$__range]))/1000*{PRICE}", "€", instant=True)], w=4,
      unit="currencyEUR", decimals=2, time_from="now/y", thresholds=GREEN)
-stat("Projected per year", [tgt(f"sum(avg_over_time({P}[7d]))*8760/1000*{PRICE}", "€/yr")], w=4,
+stat("Projected per year", [tgt(f"sum(avg_over_time({P}[7d]))*8760/1000*{PRICE}", "€/yr", instant=True)], w=4,
      unit="currencyEUR", decimals=0, desc="Average power of the last 7 days extrapolated to 365 days.",
      thresholds=GREEN)
 
-stat("Projected per month", [tgt(f"sum(avg_over_time({P}[7d]))*730/1000*{PRICE}", "€/mo")], w=4,
+stat("Projected per month", [tgt(f"sum(avg_over_time({P}[7d]))*730/1000*{PRICE}", "€/mo", instant=True)], w=4,
      unit="currencyEUR", decimals=2, desc="Average power of the last 7 days × 730 h.", thresholds=GREEN)
 stat("Cost per plug – range", [tgt(f"sum by (plug)(increase({E}[$__range]))/1000*{PRICE}", instant=True)],
      w=8, unit="currencyEUR", decimals=2, thresholds=GREEN)

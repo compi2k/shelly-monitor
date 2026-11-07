@@ -333,8 +333,8 @@
           "expr": "sum(increase(shelly_energy_wh_total{plug=~\"$plug\"}[$__range]))/1000",
           "legendFormat": "kWh",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -395,8 +395,8 @@
           "expr": "sum(increase(shelly_energy_wh_total{plug=~\"$plug\"}[$__range]))/1000*$price",
           "legendFormat": "€",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -590,8 +590,8 @@
           "expr": "sum(increase(shelly_energy_wh_total{plug=~\"$plug\"}[$__range]))/1000*$price",
           "legendFormat": "€",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -652,8 +652,8 @@
           "expr": "sum(increase(shelly_energy_wh_total{plug=~\"$plug\"}[$__range]))/1000*$price",
           "legendFormat": "€",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -714,8 +714,8 @@
           "expr": "sum(increase(shelly_energy_wh_total{plug=~\"$plug\"}[$__range]))/1000*$price",
           "legendFormat": "€",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -776,8 +776,8 @@
           "expr": "sum(avg_over_time(shelly_power_watts{plug=~\"$plug\"}[7d]))*8760/1000*$price",
           "legendFormat": "€/yr",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
@@ -837,8 +837,8 @@
           "expr": "sum(avg_over_time(shelly_power_watts{plug=~\"$plug\"}[7d]))*730/1000*$price",
           "legendFormat": "€/mo",
           "refId": "A",
-          "instant": false,
-          "range": true,
+          "instant": true,
+          "range": false,
           "format": "time_series"
         }
       ],
