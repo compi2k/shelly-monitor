@@ -1,0 +1,4 @@
+# Always check out with Unix line endings, even on Windows –
+# scripts with CRLF line endings fail on the Raspberry Pi.
+* text=auto eol=lf
+*.png binary

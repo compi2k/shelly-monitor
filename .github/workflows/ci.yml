@@ -6,16 +6,23 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"   # same as Raspberry Pi OS Bookworm
 
       - name: Install dependencies
-        run: pip install -r collector/requirements.txt prometheus_client
+        run: pip install -r collector/requirements.txt prometheus_client shellcheck-py
+
+      - name: Scripts are executable and use LF line endings
+        run: |
+          for f in install.sh uninstall.sh tools/test_collector.sh tools/fake_shelly.py grafana/gen_dashboard.py; do
+            [ "$(git ls-files -s "$f" | cut -c1-6)" = "100755" ] || { echo "::error file=$f::not executable in git (run: git update-index --chmod=+x $f)"; exit 1; }
+            ! grep -q $'\r' "$f" || { echo "::error file=$f::has Windows (CRLF) line endings"; exit 1; }
+          done
 
       - name: Shell scripts
         run: |
@@ -28,4 +35,4 @@ jobs:
           git diff --exit-code grafana/dashboards/shelly.json
 
       - name: Collector end-to-end test (fake plugs)
-        run: ./tools/test_collector.sh
+        run: bash tools/test_collector.sh
