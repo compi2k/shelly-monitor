@@ -49,7 +49,8 @@ Built for the **Shelly Plug M Gen3**, works with any Shelly Gen2+ device that ha
 - **Grafana** shows the dashboard. Viewing needs no login; editing needs the admin login.
 
 Energy and cost figures come from the plug's own kWh counter, so they stay exact even if the
-Pi is off for a while.
+Pi is off for a while. If a plug's counter jumps back after a power cut, the collector
+compensates so nothing is counted twice.
 
 ## Requirements
 
@@ -70,7 +71,7 @@ Pi is off for a while.
 **2. Install on the Pi** (over SSH is fine):
 
 ```bash
-git clone https://github.com/compi2k/shelly-monitor.git
+git clone https://github.com/<your-user>/shelly-monitor.git
 cd shelly-monitor
 sudo bash install.sh
 ```
@@ -210,7 +211,8 @@ All metrics carry `plug` and `room` labels; per-switch metrics also carry `chann
 | `shelly_power_factor` | gauge | Power factor (if reported) |
 | `shelly_apparent_power_va` | gauge | Voltage × current |
 | `shelly_temperature_celsius` | gauge | Internal temperature |
-| `shelly_energy_wh_total` | counter | Consumed energy (device counter) |
+| `shelly_energy_wh_total` | counter | Consumed energy; never decreases, even if the plug's counter goes back after a power cut |
+| `shelly_device_energy_wh` | gauge | Raw energy counter exactly as the device reports it |
 | `shelly_returned_energy_wh_total` | counter | Returned energy |
 | `shelly_energy_last_minute_wh` | gauge | Energy in the last complete minute |
 | `shelly_relay_on` | gauge | Relay state (1 = on) |

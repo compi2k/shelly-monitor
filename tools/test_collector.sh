@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="$(mktemp -d)"
-trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$TMP"' EXIT
+trap 'kill $(jobs -p) 2>/dev/null || true; wait 2>/dev/null || true; rm -rf "$TMP"' EXIT
 
 cat > "$TMP/config.yml" <<EOF
 listen_port: 19924
@@ -19,7 +19,7 @@ EOF
 python3 tools/fake_shelly.py 18081 & python3 tools/fake_shelly.py 18082 &
 sleep 1
 SHELLY_CONFIG="$TMP/config.yml" SHELLY_STATE="$TMP/state.json" python3 collector/shelly_collector.py &
-sleep 5
+sleep 6
 curl -sf localhost:19924/metrics > "$TMP/metrics.txt"
 
 check() {  # check <description> <grep -E pattern>
@@ -30,6 +30,8 @@ check "plug-a up"                 '^shelly_up\{plug="plug-a".*\} 1\.0$'
 check "unreachable plug down"     '^shelly_up\{plug="plug-down".*\} 0\.0$'
 check "power reported"            '^shelly_power_watts\{plug="plug-a"'
 check "energy counter"            '^shelly_energy_wh_total\{plug="plug-a"'
+check "counter drop compensated"  '^shelly_energy_wh_total\{plug="plug-a".*\} 1256\.5$'
+check "raw device counter"        '^shelly_device_energy_wh\{plug="plug-a".*\} 1252\.0$'
 check "4 toggles counted"         '^shelly_relay_toggles_total\{plug="plug-a".*\} 4\.0$'
 check "toggle source recorded"    'shelly_relay_switches_total\{plug="plug-a".*source="app"\} 1\.0'
 check "on-time tracked"           '^shelly_relay_on_seconds_total\{plug="plug-a"'

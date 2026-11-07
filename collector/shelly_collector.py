@@ -28,7 +28,7 @@ import aiohttp
 import yaml
 from aiohttp import web
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 log = logging.getLogger("shelly")
 
@@ -85,6 +85,7 @@ class Plug:
         s.setdefault("ws_reconnects", 0)
         s.setdefault("last_uptime", None)
         s.setdefault("last_output", {})       # cid -> bool
+        s.setdefault("energy", {})            # "cid|kind" -> {last_raw, offset}
         self.s = s
         self._on_since: dict = {}             # cid -> monotonic ts while on
 
@@ -122,6 +123,26 @@ class Plug:
                 self.s["on_seconds"][cid] = self.s["on_seconds"].get(cid, 0.0) + (now - since)
             self._on_since[cid] = now
 
+    def _track_energy(self, key: str, raw: float):
+        """Turn the device's energy counter into one that never goes backwards.
+
+        After a power cut a plug may come back with its counter a little *lower*
+        than before (it restores the last value it saved), or at 0 after a reset.
+        Prometheus would read any decrease as "reset to zero" and count the whole
+        lifetime total again. Instead we keep an offset so our exported value
+        continues exactly where it was and only grows with newly used energy.
+        """
+        e = self.s["energy"].setdefault(key, {"last_raw": raw, "offset": 0.0})
+        if raw < e["last_raw"]:
+            e["offset"] += e["last_raw"] - raw
+            log.warning("%s %s counter went back %.3f -> %.3f Wh; compensating",
+                        self.name, key, e["last_raw"], raw)
+        e["last_raw"] = raw
+
+    def energy_out(self, cid: str, kind: str):
+        e = self.s["energy"].get(f"{cid}|{kind}")
+        return None if e is None else e["last_raw"] + e["offset"]
+
     def merge_status(self, partial: dict, full: bool = False):
         """Merge a full GetStatus or a partial NotifyStatus into self.status."""
         if full:
@@ -139,6 +160,10 @@ class Plug:
         for comp, val in partial.items():
             if comp.startswith("switch:") and isinstance(val, dict):
                 self._apply_switch(comp, val)
+                for kind in ("aenergy", "ret_aenergy"):
+                    total = num((val.get(kind) or {}).get("total"))
+                    if total is not None:
+                        self._track_energy(f"{comp}|{kind}", total)
 
         sysd = new.get("sys", {})
         up = sysd.get("uptime")
@@ -300,18 +325,22 @@ class Plug:
                 out.add("shelly_apparent_power_va", "Apparent power (V*A)", "gauge", CL,
                         sw["voltage"] * sw["current"])
             ae = sw.get("aenergy") or {}
+            v = self.energy_out(comp, "aenergy")
+            if v is not None:
+                out.add("shelly_energy_wh_total", "Consumed active energy (never decreases)", "counter",
+                        CL, v)
             if num(ae.get("total")) is not None:
-                out.add("shelly_energy_wh_total", "Consumed active energy (device counter)", "counter",
+                out.add("shelly_device_energy_wh", "Raw energy counter as reported by the device", "gauge",
                         CL, ae["total"])
             if isinstance(ae.get("by_minute"), list) and ae["by_minute"]:
                 # by_minute is in milliwatt-hours; [0] = current (partial) minute, [1] = last full minute
                 if len(ae["by_minute"]) > 1:
                     out.add("shelly_energy_last_minute_wh", "Energy in last complete minute", "gauge", CL,
                             ae["by_minute"][1] / 1000.0)
-            rae = sw.get("ret_aenergy") or {}
-            if num(rae.get("total")) is not None:
-                out.add("shelly_returned_energy_wh_total", "Returned active energy", "counter", CL,
-                        rae["total"])
+            v = self.energy_out(comp, "ret_aenergy")
+            if v is not None:
+                out.add("shelly_returned_energy_wh_total", "Returned active energy (never decreases)",
+                        "counter", CL, v)
             temp = sw.get("temperature") or {}
             if num(temp.get("tC")) is not None:
                 out.add("shelly_temperature_celsius", "Internal temperature", "gauge", CL, temp["tC"])

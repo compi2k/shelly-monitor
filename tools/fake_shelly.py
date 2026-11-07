@@ -6,7 +6,8 @@ Fake Shelly Gen3 plug for development and CI – no real hardware needed.
 
 Serves Shelly.GetDeviceInfo / Shelly.GetStatus on POST /rpc and a websocket on
 GET /rpc that toggles the relay a few times (button, app, http, button) and
-then stays quiet. Point a config entry at host "127.0.0.1:18081".
+then simulates a power cut (energy counter comes back slightly lower)
+and stays quiet. Point a config entry at host "127.0.0.1:18081".
 """
 import asyncio
 import json
@@ -61,7 +62,16 @@ async def ws(req):
         state.update(out=not state["out"], src=src, energy=state["energy"] + 5)
         await sock.send_json({"src": "fake", "dst": first["src"], "method": "NotifyStatus",
                               "params": {"ts": time.time(),
-                                         "switch:0": {"id": 0, "output": state["out"], "source": src}}})
+                                         "switch:0": {"id": 0, "output": state["out"], "source": src,
+                                                      "aenergy": {"total": state["energy"]}}}})
+    # simulate a power cut: the plug comes back with its energy counter a bit
+    # lower (restored from its last save), then keeps counting (+2 Wh)
+    for energy in (state["energy"] - 4.5, state["energy"] - 2.5):
+        await asyncio.sleep(0.5)
+        state["energy"] = energy
+        await sock.send_json({"src": "fake", "dst": first["src"], "method": "NotifyStatus",
+                              "params": {"ts": time.time(),
+                                         "switch:0": {"id": 0, "aenergy": {"total": energy}}}})
     async for _ in sock:
         pass
     return sock
