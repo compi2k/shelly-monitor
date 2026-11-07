@@ -17,12 +17,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r collector/requirements.txt prometheus_client shellcheck-py
 
-      - name: Scripts are executable and use LF line endings
+      - name: Scripts use LF line endings
         run: |
-          for f in install.sh uninstall.sh tools/test_collector.sh tools/fake_shelly.py grafana/gen_dashboard.py; do
-            [ "$(git ls-files -s "$f" | cut -c1-6)" = "100755" ] || { echo "::error file=$f::not executable in git (run: git update-index --chmod=+x $f)"; exit 1; }
-            ! grep -q $'\r' "$f" || { echo "::error file=$f::has Windows (CRLF) line endings"; exit 1; }
-          done
+          if grep -lI $'\r' install.sh uninstall.sh tools/* grafana/*.py collector/*.py; then
+            echo "::error::files above have Windows (CRLF) line endings"; exit 1
+          fi
 
       - name: Shell scripts
         run: |

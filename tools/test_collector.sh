@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # End-to-end test: two fake plugs + one unreachable plug -> collector -> check metrics.
-# Used by CI; run locally with:  ./tools/test_collector.sh
+# Used by CI; run locally with:  bash tools/test_collector.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="$(mktemp -d)"

@@ -3,7 +3,7 @@
 Generates grafana/dashboards/shelly.json
 
 Edit this file to add/remove panels, then run:
-    python3 grafana/gen_dashboard.py && sudo ./install.sh
+    python3 grafana/gen_dashboard.py && sudo bash install.sh
 (You can also just edit the dashboard in Grafana's UI and "Save" — but then
 re-running this script will overwrite it.)
 """

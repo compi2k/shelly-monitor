@@ -3,14 +3,14 @@
 # Installs / updates the collector, Prometheus and Grafana as native systemd
 # services on Raspberry Pi OS / Debian.
 #
-#   sudo ./install.sh
-#   sudo GRAFANA_PORT=3001 RETENTION=2y ./install.sh     # optional settings
+#   sudo bash install.sh
+#   sudo GRAFANA_PORT=3001 RETENTION=2y bash install.sh     # optional settings
 #
 # Safe to re-run: keeps your plug config, recorded data, Grafana password and
 # the settings from previous runs.
 set -euo pipefail
 
-[[ $EUID -eq 0 ]] || { echo "Please run with sudo:  sudo ./install.sh"; exit 1; }
+[[ $EUID -eq 0 ]] || { echo "Please run with sudo:  sudo bash install.sh"; exit 1; }
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ETC=/etc/shelly-monitor
 SETTINGS="$ETC/install.env"
@@ -33,7 +33,7 @@ if command -v ss >/dev/null; then
   holder="$(ss -tlnpH "sport = :$GRAFANA_PORT" 2>/dev/null | grep -o 'users:(("[^"]*' | cut -d'"' -f2 | head -1 || true)"
   if [[ -n "$holder" && "$holder" != grafana* ]]; then
     die "Port $GRAFANA_PORT is already used by '$holder'.
-       Re-run with another port, e.g.:  sudo GRAFANA_PORT=3001 ./install.sh"
+       Re-run with another port, e.g.:  sudo GRAFANA_PORT=3001 bash install.sh"
   fi
 fi
 
