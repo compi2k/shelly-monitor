@@ -70,7 +70,7 @@ Pi is off for a while.
 **2. Install on the Pi** (over SSH is fine):
 
 ```bash
-git clone https://github.com/<your-user>/shelly-monitor.git
+git clone https://github.com/compi2k/shelly-monitor.git
 cd shelly-monitor
 sudo bash install.sh
 ```
