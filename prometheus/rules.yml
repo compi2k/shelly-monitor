@@ -1,0 +1,11 @@
+# Pre-computed series so long-range graphs (months / years) stay fast on a Pi.
+groups:
+  - name: shelly_energy
+    interval: 1m
+    rules:
+      - record: shelly:energy_wh:increase1h
+        expr: increase(shelly_energy_wh_total[1h])
+      - record: shelly:power_watts:avg5m
+        expr: avg_over_time(shelly_power_watts[5m])
+      - record: shelly:power_watts:max5m
+        expr: max_over_time(shelly_power_watts[5m])

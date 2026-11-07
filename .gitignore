@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.tmp
+state.json
+*.bak.*
+.DS_Store

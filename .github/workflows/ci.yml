@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # same as Raspberry Pi OS Bookworm
+
+      - name: Install dependencies
+        run: pip install -r collector/requirements.txt prometheus_client
+
+      - name: Shell scripts
+        run: |
+          bash -n install.sh uninstall.sh tools/test_collector.sh
+          shellcheck install.sh uninstall.sh tools/test_collector.sh
+
+      - name: Dashboard JSON is up to date with the generator
+        run: |
+          python3 grafana/gen_dashboard.py
+          git diff --exit-code grafana/dashboards/shelly.json
+
+      - name: Collector end-to-end test (fake plugs)
+        run: ./tools/test_collector.sh

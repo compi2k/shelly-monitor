@@ -1,0 +1,23 @@
+[Unit]
+Description=Shelly plug collector (Prometheus metrics on :9924)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=SHELLY_CONFIG=/etc/shelly-monitor/config.yml
+Environment=SHELLY_STATE=/var/lib/shelly-monitor/state.json
+ExecStart=/opt/shelly-monitor/venv/bin/python /opt/shelly-monitor/shelly_collector.py
+Restart=always
+RestartSec=5
+
+# runs as an unprivileged throw-away user; state lives in /var/lib/shelly-monitor
+DynamicUser=yes
+StateDirectory=shelly-monitor
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

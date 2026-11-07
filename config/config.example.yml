@@ -1,0 +1,32 @@
+# shelly-monitor – collector configuration
+# Installed to /etc/shelly-monitor/config.yml
+#
+# Add a plug = add an entry under `plugs:`, then
+#   sudo systemctl restart shelly-collector
+# It shows up in the dashboard's "Plug" dropdown automatically.
+
+listen_port: 9924
+log_level: INFO          # DEBUG shows every websocket message
+
+# Reference price, exported as metric shelly_price_per_kwh.
+# The dashboard has its own editable "Price €/kWh" box at the top.
+price_per_kwh: 0.35
+currency: EUR
+
+defaults:
+  poll_interval: 10      # seconds between full status polls (keep >= 2)
+  timeout: 5             # seconds per request
+
+plugs:
+  - name: plug-1         # short and unique, no spaces – used as label in graphs
+    host: 192.168.1.50   # IP or hostname (give the plug a fixed DHCP lease!)
+    room: Living room    # optional
+
+  - name: plug-2
+    host: 192.168.1.51
+    room: Office
+
+  # - name: washing-machine
+  #   host: 192.168.1.52
+  #   room: Bathroom
+  #   poll_interval: 5   # per-plug override
